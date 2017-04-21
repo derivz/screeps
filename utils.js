@@ -6,8 +6,9 @@ let utils = {
      * @param {!String} role
      * @param {Room} room
      * @param {Boolean} budget
+     * @param {Object} memory
     **/
-	createCreep: function(role, room=con.room,  budget=false) {
+	createCreep: function(role, room=con.room,  budget=false, memory) {
         let spawns = _.filter(
             Game.spawns, sp => sp.room == room && !sp.spawning);
         if (spawns.length === 0) return false;
@@ -24,11 +25,16 @@ let utils = {
     	        creepBody.push(MOVE);
             }
         }
+        if (!memory) {
+        	memory = {}
+		}
+		memory.role = role;
+        memory.room = room.name;
 
         if (room != con.room && room.energyCapacityAvailable < parts * 200) {
             spawn = Game.spawns.Spawn1;
         }
-        let newName = spawn.createCreep(creepBody, undefined, {role: role, room: room.name});
+        let newName = spawn.createCreep(creepBody, undefined, memory);
         console.log(`Spawning new ${role}: ${newName} for ${room.name} room at ${spawn.name}`);
 	},
 

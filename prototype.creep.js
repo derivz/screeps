@@ -1,5 +1,6 @@
 let roleBuilder = require('role.builder');
 let roleCarrier = require('role.carrier');
+let roleClaimer = require('role.claimer');
 let roleContainerHarvester = require('role.containerHavester');
 let roleHarvester = require('role.harvester');
 let roleRepairer = require('role.repairer');
@@ -7,16 +8,19 @@ let roleUpgrader = require('role.upgrader');
 let utils = require('utils');
 
 
-Creep.prototype.isHarvester = function() {return this.memory.role === 'harvester'};
 Creep.prototype.isBuilder = function() {return this.memory.role === 'builder'};
-Creep.prototype.isUpgrader = function() {return this.memory.role === 'upgrader'};
 Creep.prototype.isCarrier = function() {return this.memory.role === 'carrier'};
-Creep.prototype.isContainerHarvester = function() {return this.memory.role === 'containerHarvester'};
+Creep.prototype.isClaimer = function() {return this.memory.role === 'claimer'};
+Creep.prototype.isContainerHarvester = function() {
+    return this.memory.role === 'containerHarvester'
+};
+Creep.prototype.isHarvester = function() {return this.memory.role === 'harvester'};
 Creep.prototype.isRepairer = function() {return this.memory.role === 'repairer'};
+Creep.prototype.isUpgrader = function() {return this.memory.role === 'upgrader'};
 
 
 Creep.prototype.run = function() {
-    if (this.memory.room && this.memory.room != this.room.name) {
+    if (this.memory.room && this.memory.room !== this.room.name) {
         this.moveTo(new RoomPosition(25, 25, this.memory.room));
     } else {
         if (this.isContainerHarvester()) {
@@ -29,6 +33,8 @@ Creep.prototype.run = function() {
             roleUpgrader.run(this);
         } else if (this.isCarrier()) {
             roleCarrier.run(this);
+        } else if (this.isClaimer()) {
+            roleClaimer.run(this);
         } else if (this.isRepairer()) {
             roleRepairer.run(this);
         }
@@ -135,10 +141,11 @@ Creep.prototype.builderWork = function() {
 
 
 Creep.prototype.repairerWork = function() {
+    let startLimit = this.isSoftRepairer() ? 0 : 300000;
     let dStructures = _.sortByOrder(_.mapValues(
         this.room.find(FIND_STRUCTURES, {
             filter: structure => (structure.hits <= structure.hitsMax - 500)
-            && structure.hitsMax > 300000}),
+            && structure.hitsMax > startLimit}),
         struct => {return {hits: (struct.hits/10000>>0), structure: struct}}),
         ['hits']);
     if (dStructures) {
@@ -209,10 +216,11 @@ Creep.prototype.handleDroppedResources = function() {
         return true;
     } else if (_.sum(this.carry) > this.carry.energy) {
         let container = this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: structure => structure.structureType === STRUCTURE_STORAGE
+        }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: structure =>
-            (structure.structureType === STRUCTURE_CONTAINER ||
-            structure.structureType === STRUCTURE_STORAGE)
-            && structure.store.energy < structure.storeCapacity - 100
+            structure.structureType === STRUCTURE_CONTAINER
+            && _.sum(structure.store) < structure.storeCapacity - _.sum(this.carry)
         });
         this.say('minerals');
         if (!this.pos.isNearTo(container)) {
@@ -226,3 +234,7 @@ Creep.prototype.handleDroppedResources = function() {
     }
     return false;
 };
+
+Creep.isSoftRepairer = function () {
+    return this.memory.softRepairer
+}

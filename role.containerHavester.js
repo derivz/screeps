@@ -6,10 +6,11 @@ let utils = require('utils');
  * @return int: index of container whose harvester is dead or will die soon
  */
 function chooseContainerIndex(room) {
+    let ticksToRevive = 60;
     let existingCreepIndexes = _.filter(Game.creeps, (creep) =>
         creep.memory.role === 'containerHarvester'
         && creep.memory.room === room.name
-        && creep.ticksToLive > 40
+        && creep.ticksToLive > ticksToRevive
     ).map((creep) => creep.memory.containerIndex);
     let indexesCount = utils.getSourceContainers(room, true).length;
     for (let i = 0; i < indexesCount; i++) {
