@@ -17,7 +17,7 @@ Creep.prototype.isRepairer = function() {return this.memory.role === 'repairer'}
 
 Creep.prototype.run = function() {
     if (this.memory.room && this.memory.room != this.room.name) {
-        this.moveTo(Game.rooms[this.memory.room].controller);
+        this.moveTo(new RoomPosition(25, 25, this.memory.room));
     } else {
         if (this.isContainerHarvester()) {
             roleContainerHarvester.run(this);
