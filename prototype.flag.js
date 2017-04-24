@@ -1,12 +1,14 @@
+let mor = require('mine.other.room');
+
 Flag.prototype.closestSpawn = function() {
     if (!this.memory.spawn) {
         let spawnName = _.sortByOrder(_.mapValues(Game.spawns, sp => {
             let cost = PathFinder.search(
-                spawn.pos, this.pos,
+                sp.pos, this.pos,
                 {
                     plainCost: 1,
                     swampCost: 5,
-                    roomCallback: ignoreCreepsAndRoadsCostMatrix
+                    roomCallback: mor.ignoreCreepsAndRoadsCostMatrix
                 }
             ).cost;
             return {spawnName:sp.name, cost: cost};

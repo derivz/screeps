@@ -158,5 +158,6 @@ let runAllMining = function () {
 };
 
 module.exports = {
-    runAllMining: runAllMining
+    runAllMining: runAllMining,
+    ignoreCreepsAndRoadsCostMatrix: ignoreCreepsAndRoadsCostMatrix
 };

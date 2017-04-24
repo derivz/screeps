@@ -15,7 +15,7 @@ let roleCarrier = {
         }
 	},
 
-	create: function(room=con.room, budget=false, ) {
+	create: function(room=con.room, budget=false) {
         let spawns = _.filter(
             Game.spawns, sp => sp.room == room && !sp.spawning);
         if (spawns.length <= 0) return false;
