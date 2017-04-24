@@ -20,7 +20,8 @@ let roleRepairer = {
     expectedCount: function(room) {
         return room.find(FIND_STRUCTURES, {
             filter: structure => (structure.hits <= structure.hitsMax - 500)
-            && structure.hitsMax > 300000}).length > 0 ? 1 : 0;
+            && structure.hitsMax > 300000 && structure.hits <= 750000}
+        ).length > 0 ? 1 : 0;
     }
 };
 
