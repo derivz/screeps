@@ -150,7 +150,7 @@ Creep.prototype.repairerWork = function() {
             && structure.hitsMax > startLimit}),
         struct => {return {hits: (struct.hits/10000>>0), structure: struct}}),
         ['hits']);
-    if (dStructures) {
+    if (dStructures.length > 0) {
         let target = dStructures[0]['structure'];
         if (this.repair(target) === ERR_NOT_IN_RANGE) {
             this.moveTo(target, {visualizePathStyle: {stroke: '#00ffcd'}});

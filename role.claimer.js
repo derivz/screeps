@@ -3,7 +3,7 @@ let roleClaimer = {
     run: function(creep) {
         let controller = creep.room.controller;
         if (creep.reserveController(controller) == ERR_NOT_IN_RANGE) {
-            creep.move(controller);
+            creep.moveTo(controller);
         }
 	},
 

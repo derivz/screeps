@@ -35,9 +35,11 @@ let defaultCostMatrix = function(roomName, ignoreCreeps=false, ignoreRoads=false
     let costs = new PathFinder.CostMatrix;
     
     room.find(FIND_STRUCTURES).forEach(function(struct) {
-        if (struct.structureType === STRUCTURE_ROAD && !ignoreRoads) {
+        if (struct.structureType === STRUCTURE_ROAD) {
             // Favor roads over plain tiles
-            costs.set(struct.pos.x, struct.pos.y, 1);
+            if (!ignoreRoads) {
+                costs.set(struct.pos.x, struct.pos.y, 1);
+            }
         }
         if (struct.structureType !== STRUCTURE_CONTAINER &&
                 (struct.structureType !== STRUCTURE_RAMPART ||
@@ -58,37 +60,47 @@ let defaultCostMatrix = function(roomName, ignoreCreeps=false, ignoreRoads=false
 };
 
 let ignoreCreepsAndRoadsCostMatrix = function(roomName) {
-    return defaultCostMatrix(roomName, true);
+    return defaultCostMatrix(roomName, true, true);
 };
 
 
 let buildInfrastructure = function(flag) {
     if (!isRoomAvailable(flag)) return false;
     if (flag.memory.infrastructureBuilded) return true;
+    let errors = 0;
     let path = PathFinder.search(
-        Game.spawns.Spawn1.pos, 
+        flag.closestSpawn().pos,
         flag.pos,
         {
             plainCost: 1,
             swampCost: 2,
             roomCallback: ignoreCreepsAndRoadsCostMatrix
         }
-    ).path;
-    path.forEach(pos => {
+    );
+    if (path.incomplete) {
+        console.log('Cannot build path');
+        return false;
+    }
+    path.path.forEach(pos => {
         try {
-            pos.createConstructionSite(STRUCTURE_ROAD);
+            if (pos.createConstructionSite(STRUCTURE_ROAD) === ERR_FULL) {
+                errors++;
+            }
         }
         catch(err) {
             console.log(`Cannot build road in ${pos}. \n${err}`);
         }
     });
     try {
-        if (flag.pos.createConstructionSite(STRUCTURE_CONTAINER) === OK) {
-            flag.memory.infrastructureBuilded = true;
+        if (flag.pos.createConstructionSite(STRUCTURE_CONTAINER) === ERR_FULL) {
+            errors++;
         }
     }
     catch(err) {
         console.log(`Cannot build container in ${pos}. \n${err}`);
+    }
+    if (errors === 0) {
+        flag.memory.infrastructureBuilded = true;
     }
 };
 
