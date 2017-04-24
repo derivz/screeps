@@ -103,7 +103,7 @@ let checkScout = function(flag) {
 
 
 let checkClaimer = function (flag) {
-    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isRoleClaimer()).length === 0) {
+    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isClaimer()).length === 0) {
         roleClaimer.create(flag);
     }
 };
