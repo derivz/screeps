@@ -7,15 +7,15 @@ let roleCarrier = {
         creep.updateWorkState();
 
         if (creep.memory.work) {
-            if (this.memory.toRoom !== this.room.name) {
-                this.moveTo(new RoomPosition(25, 25, this.memory.toRoom));
+            if (creep.memory.toRoom !== creep.room.name) {
+                creep.moveTo(new RoomPosition(25, 25, creep.memory.toRoom));
             } else {
 
                 creep.carrierWork(true);
             }
         } else {
-            if (this.memory.room !== this.room.name) {
-                this.moveTo(new RoomPosition(25, 25, this.memory.room));
+            if (creep.memory.room !== creep.room.name) {
+                creep.moveTo(new RoomPosition(25, 25, creep.memory.room));
             } else {
                 creep.withdrawFromSourceContainers();
             }
@@ -24,10 +24,10 @@ let roleCarrier = {
 
 	create: function(room, spawn) {
 	    let creepBody = [];
-	    let avres = room.energyCapacityAvailable;
+	    let avres = spawn.room.energyCapacityAvailable;
         let count = Math.min(avres/150>>0, 10);
 
-        for (count; count > 0; count--){
+        for (let i = count; i > 0; i--){
 	        creepBody.push(CARRY);
 	        creepBody.push(CARRY);
 	        creepBody.push(MOVE);

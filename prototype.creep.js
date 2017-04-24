@@ -174,7 +174,7 @@ Creep.prototype.upgraderWork = function() {
 Creep.prototype.carrierWork = function(longCarrier=false) {
     let whereToPutEnergy;
     if (longCarrier) {
-        this.pos.findClosestByPath(FIND_STRUCTURES, {
+        whereToPutEnergy = this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: structure => structure.structureType === STRUCTURE_STORAGE
         });
     } else {
