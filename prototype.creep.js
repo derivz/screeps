@@ -235,6 +235,6 @@ Creep.prototype.handleDroppedResources = function() {
     return false;
 };
 
-Creep.isSoftRepairer = function () {
-    return this.memory.softRepairer
+Creep.prototype.isSoftRepairer = function () {
+    return this.memory.softRepairer;
 }

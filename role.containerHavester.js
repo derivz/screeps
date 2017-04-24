@@ -44,11 +44,13 @@ let roleContainerHarvester = {
      * This creep designed to fully harvest full source by itself.
      * Binded to appropriate container.
      */
-    create: function (room=con.room, budget=false) {
-        let spawns = _.filter(
-            Game.spawns, sp => sp.room == room && !sp.spawning);
-        if (spawns.length <= 0) return false;
-        let spawn = spawns[0];
+    create: function (room=con.room, budget=false, spawn) {
+        if (!spawn) {
+            let spawns = _.filter(
+                Game.spawns, sp => sp.room == room && !sp.spawning);
+            if (spawns.length <= 0) return false;
+            spawn = spawns[0];
+        }
 
         let work = budget ? (room.energyCapacityAvailable - 50)/100>>0 : 5;
         if (work < 2) {return false;}

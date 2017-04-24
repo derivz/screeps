@@ -19,4 +19,4 @@ let roleClaimer = {
 	},
 };
 
-module.exports = roleCarrier;
+module.exports = roleClaimer;

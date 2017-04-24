@@ -105,11 +105,11 @@ let checkRepairer = function (flag) {
 let checkContainerHarvester = function (flag) {
     if (!isContainerReady(flag)) return false;
     if (roleContainerHarvester.isContainerHarvesterAvailable(flag.room)) {
-        roleContainerHarvester.create(flag.room)
+        roleContainerHarvester.create(flag.room, false, flag.closestSpawn());
     }
 }
 
 
 module.exports = {
-    buildInfrastructure: buildInfrastructure;
+    buildInfrastructure: buildInfrastructure
 };
