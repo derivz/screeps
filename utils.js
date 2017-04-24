@@ -9,10 +9,12 @@ let utils = {
      * @param {Object} memory
     **/
 	createCreep: function(role, room=con.room,  budget=false, memory) {
+	    let spawn;
         let spawns = _.filter(
             Game.spawns, sp => sp.room == room && !sp.spawning);
-        if (spawns.length === 0) return false;
-        let spawn = spawns[0];
+        if (spawns.length > 0) {
+            spawn = spawns[0];
+        }
         let parts = 5;
         let creepBody;
         if (budget) {
@@ -31,7 +33,7 @@ let utils = {
 		memory.role = role;
         memory.room = room.name;
 
-        if (room != con.room && room.energyCapacityAvailable < parts * 200) {
+        if (room != con.room && room.energyCapacityAvailable < parts * 200 || !spawn) {
             spawn = Game.spawns.Spawn1;
         }
         let newName = spawn.createCreep(creepBody, undefined, memory);
