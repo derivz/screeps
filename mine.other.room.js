@@ -40,8 +40,7 @@ let defaultCostMatrix = function(roomName, ignoreCreeps=false, ignoreRoads=false
             if (!ignoreRoads) {
                 costs.set(struct.pos.x, struct.pos.y, 1);
             }
-        }
-        if (struct.structureType !== STRUCTURE_CONTAINER &&
+        } else if (struct.structureType !== STRUCTURE_CONTAINER &&
                 (struct.structureType !== STRUCTURE_RAMPART ||
                 !struct.my)) {
             // Can't walk through non-walkable buildings
