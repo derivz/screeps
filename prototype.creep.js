@@ -3,6 +3,7 @@ let roleCarrier = require('role.carrier');
 let roleClaimer = require('role.claimer');
 let roleContainerHarvester = require('role.containerHavester');
 let roleHarvester = require('role.harvester');
+let roleLongCarrier = require('role.longCarrier');
 let roleRepairer = require('role.repairer');
 let roleUpgrader = require('role.upgrader');
 let utils = require('utils');
@@ -11,16 +12,15 @@ let utils = require('utils');
 Creep.prototype.isBuilder = function() {return this.memory.role === 'builder'};
 Creep.prototype.isCarrier = function() {return this.memory.role === 'carrier'};
 Creep.prototype.isClaimer = function() {return this.memory.role === 'claimer'};
-Creep.prototype.isContainerHarvester = function() {
-    return this.memory.role === 'containerHarvester'
-};
+Creep.prototype.isContainerHarvester = function() {return this.memory.role === 'containerHarvester'};
 Creep.prototype.isHarvester = function() {return this.memory.role === 'harvester'};
+Creep.prototype.isLongCarrier = function() {return this.memory.role === 'longCarrier'};
 Creep.prototype.isRepairer = function() {return this.memory.role === 'repairer'};
 Creep.prototype.isUpgrader = function() {return this.memory.role === 'upgrader'};
 
 
 Creep.prototype.run = function() {
-    if (this.memory.room && this.memory.room !== this.room.name) {
+    if (this.memory.room && this.memory.room !== this.room.name && !this.isMultiRoom()) {
         this.moveTo(new RoomPosition(25, 25, this.memory.room));
     } else {
         if (this.isContainerHarvester()) {
@@ -33,6 +33,8 @@ Creep.prototype.run = function() {
             roleUpgrader.run(this);
         } else if (this.isCarrier()) {
             roleCarrier.run(this);
+        } else if (this.isLongCarrier()) {
+            roleLongCarrier.run(this);
         } else if (this.isClaimer()) {
             roleClaimer.run(this);
         } else if (this.isRepairer()) {
@@ -169,29 +171,36 @@ Creep.prototype.upgraderWork = function() {
 };
 
 
-Creep.prototype.carrierWork = function() {
-    let whereToPutEnergy = this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: structure =>
-            structure.structureType === STRUCTURE_EXTENSION &&
-            structure.energy < structure.energyCapacity
-        }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: structure =>
-            structure.structureType === STRUCTURE_SPAWN &&
-            structure.energy < structure.energyCapacity
-        }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: structure =>
-            structure.structureType === STRUCTURE_TOWER &&
-            structure.energy < structure.energyCapacity - this.carry.energy
-        }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: structure =>
-            structure.structureType === STRUCTURE_CONTAINER &&
-            this.room.memory.sourceContainerIds.indexOf(structure.id) === -1 &&
-            _.sum(structure.store) < structure.storeCapacity - this.carry.energy
-        }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: structure =>
-            structure.structureType === STRUCTURE_STORAGE &&
-            _.sum(structure.store) < structure.storeCapacity
+Creep.prototype.carrierWork = function(longCarrier=false) {
+    let whereToPutEnergy;
+    if (longCarrier) {
+        this.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: structure => structure.structureType === STRUCTURE_STORAGE
         });
+    } else {
+        whereToPutEnergy = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: structure =>
+                structure.structureType === STRUCTURE_EXTENSION &&
+                structure.energy < structure.energyCapacity
+            }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: structure =>
+                structure.structureType === STRUCTURE_SPAWN &&
+                structure.energy < structure.energyCapacity
+            }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: structure =>
+                structure.structureType === STRUCTURE_TOWER &&
+                structure.energy < structure.energyCapacity - this.carry.energy
+            }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: structure =>
+                structure.structureType === STRUCTURE_CONTAINER &&
+                this.room.memory.sourceContainerIds.indexOf(structure.id) === -1 &&
+                _.sum(structure.store) < structure.storeCapacity - this.carry.energy
+            }) || this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: structure =>
+                structure.structureType === STRUCTURE_STORAGE &&
+                _.sum(structure.store) < structure.storeCapacity
+            });
+    }
     if (whereToPutEnergy) {
         if (this.transfer(whereToPutEnergy, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             this.moveTo(whereToPutEnergy, {
@@ -235,6 +244,12 @@ Creep.prototype.handleDroppedResources = function() {
     return false;
 };
 
+
 Creep.prototype.isSoftRepairer = function () {
     return this.memory.softRepairer;
-}
+};
+
+
+Creep.prototype.isMultiRoom = function () {
+    return this.memory.toRoom;
+};

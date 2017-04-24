@@ -1,4 +1,5 @@
 require('deps');
+let mor = require('mine.other.room');
 
 module.exports.loop = function () {
     for(let name in Memory.creeps) {
@@ -8,12 +9,13 @@ module.exports.loop = function () {
         }
     }
     for (let roomId in Game.rooms) {
-        let room = Game.rooms[roomId]
+        let room = Game.rooms[roomId];
         room.handleCreeps();
     }
+    mor.runAllMining();
 
     for (let spawnId in Game.spawns) {
-        let spawn = Game.spawns[spawnId]
+        let spawn = Game.spawns[spawnId];
         if (spawn.spawning) {
             let spawningCreep = Game.creeps[spawn.spawning.name];
             spawn.room.visual.text(
@@ -25,7 +27,7 @@ module.exports.loop = function () {
     }
 
     for(let creepId in Game.creeps) {
-        let creep = Game.creeps[creepId]
+        let creep = Game.creeps[creepId];
         creep.run();
     }
 }

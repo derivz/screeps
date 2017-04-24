@@ -1,4 +1,6 @@
+let roleLongCarrier = require('role.longCarrier');
 let roleClaimer = require('role.claimer');
+let roleRepairer = require('role.repairer');
 let roleContainerHarvester = require('role.containerHavester');
 
 let isRoomAvailable = function(flag) {
@@ -11,11 +13,13 @@ let isRoomAvailable = function(flag) {
     return true;
 };
 
+
 let isStarted = function(flag) {
     if (!isRoomAvailable(flag)) return false;
     return (flag.pos.lookFor(LOOK_CONSTRUCTION_SITES).length ||
         flag.pos.lookFor(LOOK_STRUCTURES).length) > 0;
 };
+
 
 let isContainerReady = function(flag) {
     if (!isRoomAvailable(flag)) return false;
@@ -24,11 +28,6 @@ let isContainerReady = function(flag) {
         st => st.structureType === STRUCTURE_CONTAINER).length > 0
 };
 
-let checkScout = function(flag) {
-    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName).length === 0) {
-        Game.spawns.Spawn1.createCreep([MOVE], undefined, {room: flag.pos.roomName});
-    }
-};
 
 let defaultCostMatrix = function(roomName, ignoreCreeps=false, ignoreRoads=false) {
     let room = Game.rooms[roomName];
@@ -62,8 +61,10 @@ let ignoreCreepsAndRoadsCostMatrix = function(roomName) {
     return defaultCostMatrix(roomName, true);
 };
 
+
 let buildInfrastructure = function(flag) {
     if (!isRoomAvailable(flag)) return false;
+    if (flag.memory.infrastructureBuilded) return true;
     let path = PathFinder.search(
         Game.spawns.Spawn1.pos, 
         flag.pos,
@@ -82,34 +83,80 @@ let buildInfrastructure = function(flag) {
         }
     });
     try {
-        flag.pos.createConstructionSite(STRUCTURE_CONTAINER);
+        if (flag.pos.createConstructionSite(STRUCTURE_CONTAINER) === OK) {
+            flag.memory.infrastructureBuilded = true;
+        }
     }
     catch(err) {
         console.log(`Cannot build container in ${pos}. \n${err}`);
     }
 };
 
+
+let checkScout = function(flag) {
+    if (isRoomAvailable(flag)) return false;
+    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName).length === 0) {
+        Game.spawns.Spawn1.createCreep(
+            [MOVE], undefined, {room: flag.pos.roomName});
+    }
+};
+
+
 let checkClaimer = function (flag) {
     if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isRoleClaimer()).length === 0) {
         roleClaimer.create(flag);
     }
-}
+};
+
 
 let checkRepairer = function (flag) {
     if (!isRoomAvailable(flag)) return false;
-    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isRepairer()).length === 0) {
+    if (
+        _.filter(
+            Game.creeps,
+            c => c.memory.room === flag.pos.roomName && c.isRepairer()
+        ).length < roleRepairer.expectedCount(flag.room, true)
+    ) {
         roleRepairer.create(flag.room, true);
     }
-}
+};
+
 
 let checkContainerHarvester = function (flag) {
     if (!isContainerReady(flag)) return false;
     if (roleContainerHarvester.isContainerHarvesterAvailable(flag.room)) {
         roleContainerHarvester.create(flag.room, false, flag.closestSpawn());
     }
-}
+};
 
+
+let checkCarrier = function (flag) {
+    if (!isContainerReady(flag)) return false;
+    if (!roleContainerHarvester.isContainerHarvesterAvailable(flag.room)) {
+        return false;
+    }
+    if (_.filter(
+            Game.creeps,
+            c => c.memory.room === flag.pos.roomName && c.isLongCarrier()
+        ).length === 0
+    ) {
+        roleLongCarrier.create(flag.room, flag.closestSpawn());
+    }
+};
+
+
+let runAllMining = function () {
+    _.filter(Game.flags, x => x.isSourceFlag()).forEach(
+        flag => {
+            checkClaimer(flag);
+            buildInfrastructure(flag);
+            checkRepairer(flag);
+            checkContainerHarvester(flag);
+            checkCarrier(flag);
+        }
+    )
+};
 
 module.exports = {
-    buildInfrastructure: buildInfrastructure
+    runAllMining: runAllMining
 };
