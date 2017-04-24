@@ -16,7 +16,7 @@ Flag.prototype.closestSpawn = function() {
 
         this.memory.spawn = spawnName;
     }
-    return Game.getObjectById(this.memory.spawn);
+    return Game.spawns[this.memory.spawn];
 };
 
 Flag.prototype.isSourceFlag = function() {
