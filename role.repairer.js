@@ -14,7 +14,7 @@ let roleRepairer = {
     },
 
     create: function(room, soft=false) {
-        utils.createCreep('repairer', room, false, {softRepairer: soft});
+        return utils.createCreep('repairer', room, false, {softRepairer: soft});
     },
 
     expectedCount: function(room, builder=false) {

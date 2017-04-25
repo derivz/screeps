@@ -77,6 +77,8 @@ let roleContainerHarvester = {
         console.log(
             `Spawning new containerHarvester[${containerIndex}]: ${newName}
              at ${room} room.`);
+        return _.isString(newName);
+
     },
 
     /**

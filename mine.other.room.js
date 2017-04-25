@@ -114,7 +114,10 @@ let checkScout = function(flag) {
 
 
 let checkClaimer = function (flag) {
-    if (_.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isClaimer()).length === 0) {
+    if (
+        _.filter(Game.creeps, c => c.memory.room === flag.pos.roomName && c.isClaimer()).length === 0
+        && (!flag.room || flag.room.controller.reservation.ticksToEnd < 1000)
+    ) {
         roleClaimer.create(flag);
     }
 };
@@ -159,11 +162,14 @@ let checkCarrier = function (flag) {
 let runAllMining = function () {
     _.filter(Game.flags, x => x.isSourceFlag()).forEach(
         flag => {
-            checkClaimer(flag);
-            buildInfrastructure(flag);
-            checkRepairer(flag);
-            checkContainerHarvester(flag);
-            checkCarrier(flag);
+            let spRoom = flag.closestSpawn().room;
+            if (spRoom.energyAvailable > spRoom.energyCapacityAvailable - 500) {
+                checkClaimer(flag);
+                buildInfrastructure(flag);
+                checkRepairer(flag);
+                checkContainerHarvester(flag);
+                checkCarrier(flag);
+            }
         }
     )
 };

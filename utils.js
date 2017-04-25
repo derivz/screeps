@@ -38,6 +38,8 @@ let utils = {
         }
         let newName = spawn.createCreep(creepBody, undefined, memory);
         console.log(`Spawning new ${role}: ${newName} for ${room.name} room at ${spawn.name}`);
+        return _.isString(newName);
+
 	},
 
 	/**

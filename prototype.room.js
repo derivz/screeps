@@ -11,10 +11,12 @@ Room.prototype.handleCreeps = function() {
     if (!this.controller || !this.controller.my) {
         return false;
     }
+    tower.towerLogic(this);
+
     let creepCounts = _.mapValues(
         _.groupBy(_.filter(
             Game.creeps,
-            x=>(x.memory.room==this.name) || (!x.memory.room && this == con.room)
+            x=>(x.memory.room === this.name) || (!x.memory.room && this === con.room)
         ), 'memory.role'),
         (v) => v.length
     );
@@ -26,7 +28,34 @@ Room.prototype.handleCreeps = function() {
     let repairersCount = creepCounts.repairer || 0;
 
     // creeps creating
-    console.log(`${upgradersCount} upgraders, ${buildersCount} builders at room ${this.name}`);
+
+    if (roleContainerHarvester.isContainerHarvesterAvailable(this)) {
+        if (roleContainerHarvester.create(this)) return true;
+    } else {
+        if(harvestersCount === 0) {
+            utils.createCreep('harvester', this, true);
+            return true;
+        } else if(harvestersCount < 2) {
+            utils.createCreep('harvester', this);
+        }
+    }
+
+    let carryGoodCount = 2;
+    let oldCarrier = _.filter(
+        Game.creeps,
+        c => c.isCarrier() && c.memory.room === this.name && c.ticksToLive < 30);
+    if(carriersCount < carryGoodCount + 1 && oldCarrier.length > 0
+            || carriersCount < carryGoodCount) {
+        roleCarrier.create(this);
+    } else if(carriersCount < 1) {
+        roleCarrier.create(this, true);
+        return true;
+    }
+
+
+
+    console.log(`${upgradersCount} upgraders, `,
+        `${buildersCount} builders at room ${this.name}`);
     if(upgradersCount < 1) {
         roleUpgrader.create(this);
     }else if(buildersCount < 2) {
@@ -37,26 +66,4 @@ Room.prototype.handleCreeps = function() {
         roleRepairer.create(this);
     }
 
-    if (roleContainerHarvester.isContainerHarvesterAvailable(this)) {
-        roleContainerHarvester.create(this);
-    } else {
-        if(harvestersCount === 0) {
-            utils.createCreep('harvester', this, true);
-        } else if(harvestersCount < 2) {
-            utils.createCreep('harvester', this);
-        }
-    }
-
-    let carryGoodCount = this.name == con.room.name ? 2 : 2;
-    let oldCarrier = _.filter(
-        Game.creeps,
-        c => c.isCarrier() && c.memory.room == this.name && c.ticksToLive < 30);
-    if(carriersCount < carryGoodCount + 1 && oldCarrier.length > 0
-            || carriersCount < carryGoodCount) {
-        roleCarrier.create(this);
-    } else if(carriersCount < 1) {
-        roleCarrier.create(this, true);
-    }
-
-    tower.towerLogic(this);
 };

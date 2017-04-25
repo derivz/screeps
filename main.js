@@ -12,6 +12,8 @@ module.exports.loop = function () {
         let room = Game.rooms[roomId];
         room.handleCreeps();
     }
+
+
     mor.runAllMining();
 
     for (let spawnId in Game.spawns) {

@@ -14,7 +14,7 @@ let roleBuilder = {
     },
 
     create: function(room) {
-        utils.createCreep('builder', room);
+        return utils.createCreep('builder', room);
     }
 };
 

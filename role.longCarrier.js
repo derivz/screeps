@@ -25,7 +25,7 @@ let roleCarrier = {
 	create: function(room, spawn) {
 	    let creepBody = [];
 	    let avres = spawn.room.energyCapacityAvailable;
-        let count = Math.min(avres/150>>0, 10);
+        let count = Math.min(avres/150>>0, 15);
 
         for (let i = count; i > 0; i--){
 	        creepBody.push(CARRY);
