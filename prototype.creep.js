@@ -45,7 +45,7 @@ Creep.prototype.run = function() {
 
 
 Creep.prototype.updateWorkState = function() {
-    if (this.memory.work && this.carry.energy === 0) {
+    if (this.memory.work && _.sum(this.carry) === 0) {
         this.memory.work = false;
         this.say('! withdraw');
     }
@@ -78,10 +78,7 @@ Creep.prototype.withdrawFromSourceContainers = function() {
     let container = this.pos.findClosestByPath(
         utils.getSourceContainers(this.room),
         {filter: structure => structure.store.energy > 200}
-    ) || this.pos.findClosestByPath(
-        utils.getSourceContainers(this.room),
-        {filter: structure => structure.store.energy > 0}
-    );
+    ) || this.pos.findClosestByPath(utils.getSourceContainers(this.room));
     if (container) {
         if (this.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             if (this.carry.energy > this.carryCapacity/2) {
@@ -223,7 +220,7 @@ Creep.prototype.handleDroppedResources = function() {
                 {visualizePathStyle: {stroke: '#02afff'}});
         }
         return true;
-    } else if (_.sum(this.carry) > this.carry.energy) {
+    } else if (_.sum(this.carry) > this.carry.energy && this.memory.work) {
         let container = this.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: structure => structure.structureType === STRUCTURE_STORAGE
         }) || this.pos.findClosestByPath(FIND_STRUCTURES, {

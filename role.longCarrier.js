@@ -17,7 +17,7 @@ let roleCarrier = {
             if (creep.memory.room !== creep.room.name) {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.room));
             } else {
-                creep.withdrawFromSourceContainers();
+                creep.handleDroppedResources() || creep.withdrawFromSourceContainers();
             }
         }
 	},
