@@ -129,7 +129,7 @@ let checkRepairer = function (flag) {
         _.filter(
             Game.creeps,
             c => c.memory.room === flag.pos.roomName && c.isRepairer()
-        ).length < roleRepairer.expectedCount(flag.room, true)
+        ).length < roleRepairer.expectedCount(flag.room, true, true)
     ) {
         roleRepairer.create(flag.room, true);
     }
